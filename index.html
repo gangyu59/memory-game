@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.0">
     <script src="main.js" defer></script>
     <link rel="manifest" href="manifest.json">
     <script>
@@ -50,30 +50,6 @@
             text-decoration: none;
             cursor: pointer;
         }
-
-        .row {
-            display: flex;
-        }
-
-        .cell {
-            width: 60px;
-            height: 60px;
-            margin: 5px;
-            background-color: #ccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .cell.flipped {
-            background-color: #fff;
-        }
-
-        .cell.matched {
-            background-color: #8f8;
-        }
     </style>
 </head>
 <body>
@@ -104,5 +80,25 @@
             </ul>
         </div>
     </div>
+
+    <script>
+        const modal = document.getElementById("rules-modal");
+        const btn = document.getElementById("rules-button");
+        const span = document.getElementsByClassName("close-button")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

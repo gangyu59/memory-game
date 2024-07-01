@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createGame(size) {
         const icons = ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🎱', '🥎', '🏐', '🏉', '🥏', '🎳', '🏓', '🏸', '🥊', '🥋', '⛳️', '🥅', '⛸', '🥌', '🎿', '🏂', '🏋️‍♂️', '🏋️‍♀️', '🤼‍♂️', '🤼‍♀️', '🤸‍♂️', '🤸‍♀️', '⛹️‍♂️', '⛹️‍♀️', '🤺', '🤿', '🏊‍♂️', '🏊‍♀️', '🤽‍♂️', '🤽‍♀️', '🚴‍♂️', '🚴‍♀️', '🚵‍♂️', '🚵‍♀️', '🏇', '🧘‍♂️', '🧘‍♀️', '🏄‍♂️', '🏄‍♀️', '🏆', '🥇', '🥈', '🥉'];
         randomShuffle(icons);
-        const selectedIcons = icons.slice(0, (size * size) / 2);
+        const selectedIcons = icons.slice(0, Math.floor((size * size) / 2));
         const pairs = selectedIcons.concat(selectedIcons);
         randomShuffle(pairs);
         cards = [];
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cards[row1][col1] === cards[row][col]) {
                 matched[row1][col1] = true;
                 matched[row][col] = true;
-                if (matched.flat().every(Boolean)) {
+                if (matched.flat().filter(Boolean).length === size * size - 1) {
                     messageDiv.innerHTML = `<span style="color: green;">恭喜成功！一共用了${moveCount}步。</span>`;
                 }
             } else {
@@ -110,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.remove('flipped');
         }
     }
-
 
     function updateMoveCounter() {
         moveCount++;
