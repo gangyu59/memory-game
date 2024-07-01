@@ -1,6 +1,6 @@
 {
-  "name": "Memory Game",
-  "short_name": "Memory",
+  "name": "Tower of Hanoi",
+  "short_name": "Hanoi",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f0f0",

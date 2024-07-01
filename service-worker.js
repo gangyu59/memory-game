@@ -1,6 +1,6 @@
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open('memory-game-cache').then((cache) => {
+        caches.open('tower-of-hanoi-cache').then((cache) => {
             return cache.addAll([
                 './index.html',
                 './style.css',

@@ -14,16 +14,95 @@
             .catch(error => console.error('Service Worker Registration failed:', error));
         }
     </script>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .cell.flipped {
+            background-color: #fff;
+        }
+
+        .cell.matched {
+            background-color: #8f8;
+        }
+    </style>
 </head>
 <body>
     <h1>Memory Game</h1>
+    <div id="move-counter">翻牌次数 = 0</div>
     <div id="game-container">
         <!-- Memory game grid -->
     </div>
-    <button id="start-button">开始</button>
-    <label for="difficulty-slider">难度：</label>
-    <input type="range" id="difficulty-slider" min="1" max="5" value="3">
-    <span id="difficulty-label">中等</span>
+
+    <div id="controls">
+        <label for="difficulty-slider">难度：<span id="difficulty-label">中等</span></label><br>
+        <input type="range" id="difficulty-slider" min="1" max="5" value="3"><br>
+        <button id="start-button">开始</button><br>
+        <button id="rules-button">游戏规则</button>
+    </div>
     <div id="message"></div>
+
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>游戏规则</h2>
+            <p>记忆游戏是一款挑战记忆力的游戏，规则如下：</p>
+            <ul style="text-align: left;">
+                <li>所有卡片开始时都面朝下放置</li>
+                <li>每次翻开两张卡片，找到相同的配对卡片</li>
+                <li>如果两张卡片不同，它们会翻回面朝下</li>
+                <li>用最少的次数找到所有配对卡片即为成功</li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

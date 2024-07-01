@@ -4,12 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultySlider = document.getElementById('difficulty-slider');
     const difficultyLabel = document.getElementById('difficulty-label');
     const messageDiv = document.getElementById('message');
+    const moveCounter = document.getElementById('move-counter');
+    const rulesModal = document.getElementById('rules-modal');
+    const rulesButton = document.getElementById('rules-button');
+    const closeButton = document.querySelector('.close-button');
 
     let size;
     let cards = [];
     let flipped = [];
     let matched = [];
     let firstFlip = null;
+    let moveCount = 0;
 
     const difficulties = ['超易', '较易', '中等', '较难', '超难'];
 
@@ -21,8 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const level = parseInt(difficultySlider.value);
         size = level + 2;
         messageDiv.textContent = '';
+        moveCount = 0;
+        moveCounter.textContent = `翻牌次数 = ${moveCount}`;
         createGame(size);
         displayGame(size);
+    });
+
+    rulesButton.addEventListener('click', () => {
+        rulesModal.style.display = 'block';
+    });
+
+    closeButton.addEventListener('click', () => {
+        rulesModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === rulesModal) {
+            rulesModal.style.display = 'none';
+        }
     });
 
     function createGame(size) {
@@ -56,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (flipped[row][col] || matched[row][col]) return;
         flipped[row][col] = true;
         updateCell(row, col);
+        updateMoveCounter();
         if (!firstFlip) {
             firstFlip = { row, col };
         } else {
@@ -64,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 matched[row1][col1] = true;
                 matched[row][col] = true;
                 if (matched.flat().every(Boolean)) {
-                    messageDiv.textContent = '恭喜成功！';
+                    messageDiv.innerHTML = `<span style="color: green;">恭喜成功！一共用了${moveCount}步。</span>`;
                 }
             } else {
                 setTimeout(() => {
@@ -87,6 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.textContent = '';
             cell.classList.remove('flipped');
         }
+    }
+
+
+    function updateMoveCounter() {
+        moveCount++;
+        moveCounter.textContent = `翻牌次数 = ${moveCount}`;
     }
 
     function randomShuffle(array) {
