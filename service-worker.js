@@ -1,13 +1,14 @@
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open('tower-of-hanoi-cache').then((cache) => {
+        caches.open('memory-game-cache').then((cache) => {
             return cache.addAll([
                 './index.html',
                 './style.css',
                 './main.js',
                 './manifest.json',
-                './service-worker.js'
-                // Add other files you want to cache
+                './service-worker.js',
+                './icons/icon-192.png', // Ensure your icons are added here
+                './icons/icon-512.png'  // Ensure your icons are added here
             ]);
         }).catch(error => {
             console.error('Caching failed:', error);
