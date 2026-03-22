@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let matched = [];
     let firstFlip = null;
     let moveCount = 0;
+    let lockBoard = false;
 
     const difficulties = ['超易', '较易', '中等', '较难', '超难'];
 
@@ -26,8 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const level = parseInt(difficultySlider.value);
         size = level + 2;
         messageDiv.textContent = '';
+        messageDiv.classList.remove('win');
         moveCount = 0;
         moveCounter.textContent = `翻牌次数 = ${moveCount}`;
+        firstFlip = null;
+        lockBoard = false;
         createGame(size);
         displayGame(size);
     });
@@ -47,10 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function createGame(size) {
-        const icons = ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🎱', '🥎', '🏐', '🏉', '🥏', '🎳', '🏓', '🏸', '🥊', '🥋', '⛳️', '🥅', '⛸', '🥌', '🎿', '🏂', '🏋️‍♂️', '🏋️‍♀️', '🤼‍♂️', '🤼‍♀️', '🤸‍♂️', '🤸‍♀️', '⛹️‍♂️', '⛹️‍♀️', '🤺', '🤿', '🏊‍♂️', '🏊‍♀️', '🤽‍♂️', '🤽‍♀️', '🚴‍♂️', '🚴‍♀️', '🚵‍♂️', '🚵‍♀️', '🏇', '🧘‍♂️', '🧘‍♀️', '🏄‍♂️', '🏄‍♀️', '🏆', '🥇', '🥈', '🥉'];
+        const icons = ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🎱', '🥎', '🏐', '🏉', '🥏',
+            '🎳', '🏓', '🏸', '🥊', '🥋', '⛳️', '🥅', '⛸', '🥌', '🎿',
+            '🏂', '🏋️', '🤼', '🤸', '⛹️', '🤺', '🤿', '🏊', '🤽', '🚴',
+            '🚵', '🏇', '🧘', '🏄', '🏆', '🥇', '🥈', '🥉', '🎯', '🎮',
+            '🎲', '🃏', '🎸', '🎺', '🎻', '🎹', '🥁', '🎤', '🎧', '🎨'];
         randomShuffle(icons);
         const selectedIcons = icons.slice(0, Math.floor((size * size) / 2));
         const pairs = selectedIcons.concat(selectedIcons);
+        // Pad with a duplicate if odd number of cells (e.g. 3x3 = 9 cells)
+        if (pairs.length < size * size) {
+            pairs.push(selectedIcons[0]);
+        }
         randomShuffle(pairs);
         cards = [];
         for (let i = 0; i < size; i++) {
@@ -61,12 +73,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayGame(size) {
+        // Responsive card size: fit within screen width
+        const availableWidth = Math.min(window.innerWidth - 40, 480);
+        const gapTotal = (size - 1) * 6;
+        const containerPadding = 28; // 14px × 2
+        const cardSize = Math.min(
+            Math.max(Math.floor((availableWidth - gapTotal - containerPadding) / size), 40),
+            68
+        );
+        document.documentElement.style.setProperty('--card-size', cardSize + 'px');
+
         gameContainer.innerHTML = '';
-        gameContainer.style.gridTemplateColumns = `repeat(${size}, 60px)`;
+        gameContainer.style.gridTemplateColumns = `repeat(${size}, var(--card-size, 64px))`;
+
         for (let r = 0; r < size; r++) {
             for (let c = 0; c < size; c++) {
                 const cell = document.createElement('div');
                 cell.classList.add('cell');
+
+                const cardInner = document.createElement('div');
+                cardInner.classList.add('card-inner');
+
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+                cardBack.textContent = '?';
+
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-front');
+
+                cardInner.appendChild(cardBack);
+                cardInner.appendChild(cardFront);
+                cell.appendChild(cardInner);
+
                 cell.addEventListener('click', () => handleCellClick(r, c));
                 gameContainer.appendChild(cell);
             }
@@ -74,40 +112,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleCellClick(row, col) {
-        if (flipped[row][col] || matched[row][col]) return;
+        if (lockBoard || flipped[row][col] || matched[row][col]) return;
+
         flipped[row][col] = true;
         updateCell(row, col);
         updateMoveCounter();
+
         if (!firstFlip) {
             firstFlip = { row, col };
         } else {
             const { row: row1, col: col1 } = firstFlip;
+            firstFlip = null;
+
             if (cards[row1][col1] === cards[row][col]) {
+                // Match!
                 matched[row1][col1] = true;
                 matched[row][col] = true;
-                if (matched.flat().filter(Boolean).length === size * size - 1) {
-                    messageDiv.innerHTML = `<span style="color: green;">恭喜成功！一共用了${moveCount}步。</span>`;
+                updateCell(row1, col1);
+                updateCell(row, col);
+
+                const totalCells = matched.flat().filter(Boolean).length;
+                if (totalCells === size * size) {
+                    setTimeout(() => {
+                        messageDiv.classList.add('win');
+                        messageDiv.innerHTML =
+                            `<span style="background:linear-gradient(90deg,#f9a825,#f06292,#7c4dff);` +
+                            `-webkit-background-clip:text;-webkit-text-fill-color:transparent;` +
+                            `background-clip:text;">🎉 恭喜成功！共用了 ${moveCount} 步！</span>`;
+                    }, 300);
                 }
             } else {
+                // Mismatch — lock board then flip back
+                lockBoard = true;
                 setTimeout(() => {
                     flipped[row1][col1] = false;
                     flipped[row][col] = false;
                     updateCell(row1, col1);
                     updateCell(row, col);
+                    lockBoard = false;
                 }, 1000);
             }
-            firstFlip = null;
         }
     }
 
     function updateCell(row, col) {
         const cell = gameContainer.children[row * size + col];
+        const cardFront = cell.querySelector('.card-front');
+
         if (flipped[row][col] || matched[row][col]) {
-            cell.textContent = cards[row][col];
+            cardFront.textContent = cards[row][col];
             cell.classList.add('flipped');
         } else {
-            cell.textContent = '';
+            cardFront.textContent = '';
             cell.classList.remove('flipped');
+        }
+
+        if (matched[row][col]) {
+            cell.classList.add('matched');
+        } else {
+            cell.classList.remove('matched');
         }
     }
 
