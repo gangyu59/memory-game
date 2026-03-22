@@ -57,11 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
             '🚵', '🏇', '🧘', '🏄', '🏆', '🥇', '🥈', '🥉', '🎯', '🎮',
             '🎲', '🃏', '🎸', '🎺', '🎻', '🎹', '🥁', '🎤', '🎧', '🎨'];
         randomShuffle(icons);
-        const selectedIcons = icons.slice(0, Math.floor((size * size) / 2));
+        const totalCells = size * size;
+        const pairCount = Math.floor(totalCells / 2);
+        const selectedIcons = icons.slice(0, pairCount);
         const pairs = selectedIcons.concat(selectedIcons);
-        // Pad with a duplicate if odd number of cells (e.g. 3x3 = 9 cells)
-        if (pairs.length < size * size) {
-            pairs.push(selectedIcons[0]);
+        // Odd grid (e.g. 3×3=9): add a free tile instead of a duplicate icon
+        if (totalCells % 2 === 1) {
+            pairs.push('__free__');
         }
         randomShuffle(pairs);
         cards = [];
@@ -70,6 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         flipped = Array.from({ length: size }, () => Array(size).fill(false));
         matched = Array.from({ length: size }, () => Array(size).fill(false));
+        // Pre-match the free tile so win condition is never blocked
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (cards[r][c] === '__free__') {
+                    matched[r][c] = true;
+                    flipped[r][c] = true;
+                }
+            }
+        }
     }
 
     function displayGame(size) {
@@ -96,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const cardBack = document.createElement('div');
                 cardBack.classList.add('card-back');
-                cardBack.textContent = '?';
 
                 const cardFront = document.createElement('div');
                 cardFront.classList.add('card-front');
@@ -107,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 cell.addEventListener('click', () => handleCellClick(r, c));
                 gameContainer.appendChild(cell);
+            }
+        }
+        // Reveal any pre-matched free tiles
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (matched[r][c]) updateCell(r, c);
             }
         }
     }
@@ -160,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardFront = cell.querySelector('.card-front');
 
         if (flipped[row][col] || matched[row][col]) {
-            cardFront.textContent = cards[row][col];
+            cardFront.textContent = cards[row][col] === '__free__' ? '⭐' : cards[row][col];
             cell.classList.add('flipped');
         } else {
             cardFront.textContent = '';

@@ -1,5 +1,5 @@
 // Cache version — bump this string whenever you deploy new assets
-const CACHE_VERSION = 'memory-game-v2';
+const CACHE_VERSION = 'memory-game-v3';
 
 const ASSETS = [
     './',
